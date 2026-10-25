@@ -1,0 +1,33 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Private names
+        env:
+          NAMES: ${{ secrets.TDR_PRIVATE_NAMES }}
+        run: |
+          if [ -n "$NAMES" ]; then
+            printf '%s\n' "$NAMES" > "$RUNNER_TEMP/private-names.txt"
+            echo "TDR_PRIVATE_NAMES=$RUNNER_TEMP/private-names.txt" >> "$GITHUB_ENV"
+          fi
+      - name: Check the record
+        run: python tools/tdr.py check
+      - name: Check the tier of the change
+        if: github.event_name == 'pull_request'
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s\n' "$BODY" > "$RUNNER_TEMP/message.txt"
+          python tools/tdr.py tier --message "$RUNNER_TEMP/message.txt"

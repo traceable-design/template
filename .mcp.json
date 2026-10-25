@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tdr": {
+      "command": "python",
+      "args": ["tools/tdr.py", "mcp"]
+    }
+  }
+}
